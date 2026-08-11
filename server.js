@@ -1,7 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3000;
+
+app.use(cors({
+  origin: "https://sheharzad-portfolio.vercel.app"
+}));
 
 // Parse JSON request bodies
 app.use(express.json());
@@ -50,9 +55,3 @@ app.post("/api/contact", (req, res) => {
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`API running on http://127.0.0.1:${PORT}`);
 });
-
-const cors = require("cors");
-
-app.use(cors({
-  origin: "https://sheharzad-portfolio.vercel.app/"
-}));
