@@ -10,6 +10,13 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "portfolio-api"
+  });
+});
+
 app.get("/api/message", (req, res) => {
   res.json({
     message: "Hello from AWS EC2!"
