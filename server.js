@@ -19,7 +19,7 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/message", (req, res) => {
   res.json({
-    message: "Hello from AWS EC2!"
+    message: "Hello from AWS EC2 - deployed by GitHub Actions!"
   });
 });
 
