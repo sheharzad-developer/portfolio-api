@@ -1,5 +1,10 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = 3000;
@@ -31,7 +36,7 @@ app.get("/api/message", (req, res) => {
   });
 });
 
-app.post("/api/contact", (req, res) => {
+app.post("/api/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
@@ -40,16 +45,42 @@ app.post("/api/contact", (req, res) => {
     });
   }
 
-  console.log("New contact message:", {
-    name,
-    email,
-    message
-  });
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Portfolio <onboarding@resend.dev>",
+      to: ["sheharzad.salahuddin9000@outlook.com"],
+      subject: `New Portfolio Contact from ${name}`,
+      replyTo: email,
+      text: `
+    Name: ${name}
+    Email: ${email}
 
-  res.status(201).json({
-    success: true,
-    message: "Contact message received successfully."
-  });
+    Message:
+    ${message}
+      `
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+
+      return res.status(500).json({
+        error: "Failed to send email."
+      });
+    }
+
+    console.log("Email sent successfully:", data);
+
+    res.status(201).json({
+      success: true,
+      message: "Your message has been sent successfully."
+    });
+  } catch (error) {
+    console.error("Contact email error:", error);
+
+    res.status(500).json({
+      error: "Failed to send email."
+    });
+  }
 });
 
 app.listen(PORT, "127.0.0.1", () => {
