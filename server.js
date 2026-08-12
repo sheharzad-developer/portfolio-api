@@ -60,9 +60,9 @@ app.post("/api/contact", async (req, res) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Portfolio <onboarding@resend.dev>",
+      from: "Sheharzad <onboarding@resend.dev>",
       to: ["sheharzad.salahuddin9000@outlook.com"],
-      subject: `New Portfolio Contact from ${name}`,
+      subject: `New Project Inquiry — Sheharzad Portfolio ${name}`,
       replyTo: email,
       text: `
     Name: ${name}
