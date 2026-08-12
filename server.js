@@ -30,6 +30,23 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
+const httpRequestsTotal = new client.Counter({
+  name: "http_requests_total",
+  help: "Total number of HTTP requests",
+  labelNames: ["method", "route", "status_code"],
+});
+
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    httpRequestsTotal.inc({
+      method: req.method,
+      route: req.route ? req.route.path : req.path,
+      status_code: res.statusCode,
+    });
+  });
+  next();
+});
+
 app.use(cors({
   origin(origin, callback) {
     // allow no-Origin requests (curl, server-to-server, health checks)
