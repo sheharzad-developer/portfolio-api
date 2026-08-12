@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Resend } = require("resend");
+const client = require("prom-client");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -13,6 +14,21 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://sheharzad-portfolio.vercel.app',
 ];
+
+// Prometheus metrics
+const collectDefaultMetrics = client.collectDefaultMetrics;
+
+collectDefaultMetrics();
+
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+  } catch (error) {
+    console.error("Metrics error:", error);
+    res.status(500).end();
+  }
+});
 
 app.use(cors({
   origin(origin, callback) {
