@@ -36,13 +36,25 @@ const httpRequestsTotal = new client.Counter({
   labelNames: ["method", "route", "status_code"],
 });
 
+const httpRequestDurationSeconds = new client.Histogram({
+  name: "http_request_duration_seconds",
+  help: "HTTP request duration in seconds",
+  labelNames: ["method", "route", "status_code"],
+  buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+});
+
 app.use((req, res, next) => {
+  const endTimer = httpRequestDurationSeconds.startTimer();
+
   res.on("finish", () => {
-    httpRequestsTotal.inc({
+    const labels = {
       method: req.method,
       route: req.route ? req.route.path : req.path,
       status_code: res.statusCode,
-    });
+    };
+
+    httpRequestsTotal.inc(labels);
+    endTimer(labels);
   });
   next();
 });
