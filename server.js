@@ -9,8 +9,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const app = express();
 const PORT = 3000;
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://sheharzad-portfolio.vercel.app',
+];
+
 app.use(cors({
-  origin: "https://sheharzad-portfolio.vercel.app"
+  origin(origin, callback) {
+    // allow no-Origin requests (curl, server-to-server, health checks)
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
 }));
 
 // Parse JSON request bodies

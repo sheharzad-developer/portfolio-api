@@ -89,15 +89,28 @@ Nginx listens on 80/443 and proxies `/api/*` to the Express app. Key detail: `pr
 
 ## CORS / Security
 
-CORS is locked to a single allowed origin:
+CORS is restricted to an explicit allowlist (no wildcard) covering the production frontend and local development:
 
 ```js
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://sheharzad-portfolio.vercel.app',
+];
+
 app.use(cors({
-  origin: "https://sheharzad-portfolio.vercel.app"
+  origin(origin, callback) {
+    // allow no-Origin requests (curl, server-to-server, health checks)
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
 }));
 ```
 
-Two things that matter here: the CORS middleware **must be registered before the routes it protects** (Express applies middleware in registration order), and the `origin` value must **not** have a trailing slash — browsers never send a trailing slash in the `Origin` header, so a mismatched slash silently blocks every request. Both were real bugs encountered during development (see below).
+Two things that matter here: the CORS middleware **must be registered before the routes it protects** (Express applies middleware in registration order), and origin values must **not** have a trailing slash — browsers never send a trailing slash in the `Origin` header, so a mismatched slash silently blocks every request. Both were real bugs encountered during development (see below).
 
 ## API Endpoints
 
